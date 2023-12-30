@@ -1,6 +1,6 @@
 use std::thread::scope;
 use std::time::Instant;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use tikv_jemallocator::Jemalloc;
@@ -23,11 +23,31 @@ fn string_size() -> usize {
 }
 
 fn total_thread_count() -> usize {
-    TOTAL_THREAD_COUNT
+    static ONCE: OnceLock<usize> = OnceLock::new();
+
+    *ONCE.get_or_init(|| {
+        if let Some(v) = std::env::var("TOTAL_THREAD_COUNT").ok().and_then(|s| s.parse().ok()) {
+            v
+        } else {
+            println!("Using fallback value for TOTAL_THREAD_COUNT: {TOTAL_THREAD_COUNT}");
+            TOTAL_THREAD_COUNT
+        }
+    })
 }
 
 fn should_drop() -> bool {
-    DROP
+    static ONCE: OnceLock<bool> = OnceLock::new();
+
+    *ONCE.get_or_init(|| {
+        match std::env::var("SHOULD_DROP").ok() {
+            Some(v) if v == "yes" => true,
+            Some(v) if v == "no" => false,
+            _ => {
+                println!("Using fallback value for SHOULD_DROP: {DROP}");
+                DROP
+            }
+        }
+    })
 }
 
 fn main() {

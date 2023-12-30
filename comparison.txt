@@ -1,0 +1,75 @@
+Running with SHOULD_DROP=yes and TOTAL_THREAD_COUNT=1
+Running on 1 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Not dropping cloned elements.
+Took 55ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 138ms to perform 16777216 clone operations on alloc::string::String.
+Running with SHOULD_DROP=yes and TOTAL_THREAD_COUNT=2
+Running on 2 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Not dropping cloned elements.
+Took 800ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 142ms to perform 16777216 clone operations on alloc::string::String.
+Running with SHOULD_DROP=yes and TOTAL_THREAD_COUNT=4
+Running on 4 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Not dropping cloned elements.
+Took 2280ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 157ms to perform 16777216 clone operations on alloc::string::String.
+Running with SHOULD_DROP=yes and TOTAL_THREAD_COUNT=8
+Running on 8 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Not dropping cloned elements.
+Took 3488ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 279ms to perform 16777216 clone operations on alloc::string::String.
+Running with SHOULD_DROP=yes and TOTAL_THREAD_COUNT=12
+Running on 12 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Not dropping cloned elements.
+Took 4866ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 282ms to perform 16777216 clone operations on alloc::string::String.
+Running with SHOULD_DROP=false and TOTAL_THREAD_COUNT=1
+Running on 1 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Not dropping cloned elements.
+Using fallback value for SHOULD_DROP: false
+Took 27ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 281ms to perform 16777216 clone operations on alloc::string::String.
+Running with SHOULD_DROP=false and TOTAL_THREAD_COUNT=2
+Running on 2 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Not dropping cloned elements.
+Using fallback value for SHOULD_DROP: false
+Took 336ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 300ms to perform 16777216 clone operations on alloc::string::String.
+Running with SHOULD_DROP=false and TOTAL_THREAD_COUNT=4
+Running on 4 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Not dropping cloned elements.
+Using fallback value for SHOULD_DROP: false
+Took 732ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 399ms to perform 16777216 clone operations on alloc::string::String.
+Running with SHOULD_DROP=false and TOTAL_THREAD_COUNT=8
+Running on 8 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Not dropping cloned elements.
+Using fallback value for SHOULD_DROP: false
+Took 1947ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 893ms to perform 16777216 clone operations on alloc::string::String.
+Running with SHOULD_DROP=false and TOTAL_THREAD_COUNT=12
+Running on 12 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Not dropping cloned elements.
+Using fallback value for SHOULD_DROP: false
+Took 2691ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 1231ms to perform 16777216 clone operations on alloc::string::String.
