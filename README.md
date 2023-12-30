@@ -22,4 +22,4 @@ The command is `python3 to_csv.py < comparison_data.json > comparison_data.csv`.
 Be ware that the script requires `pandas`.
 
 # Step 4: Use the data
-Libreoffice Calc
+Libreoffice Calc or Excel in my case
