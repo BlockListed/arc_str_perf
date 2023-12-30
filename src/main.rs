@@ -12,12 +12,32 @@ const SAMPLES: u64 = 2u64.pow(24);
 const STRING_SIZE: usize = 64;
 const TOTAL_THREAD_COUNT: usize = 12;
 
-fn main() {
-    let base: String = std::iter::repeat('A').take(STRING_SIZE).collect();
+const DROP: bool = false;
 
-    println!("Running on {TOTAL_THREAD_COUNT} threads concurrently.");
-    println!("Using strings of size {STRING_SIZE}.");
-    println!("Running {SAMPLES} samples.");
+fn samples() -> u64 {
+    SAMPLES
+}
+
+fn string_size() -> usize {
+    STRING_SIZE
+}
+
+fn total_thread_count() -> usize {
+    TOTAL_THREAD_COUNT
+}
+
+fn should_drop() -> bool {
+    DROP
+}
+
+fn main() {
+    let base: String = std::iter::repeat('A').take(string_size()).collect();
+
+    println!("Running on {} threads concurrently.", total_thread_count());
+    println!("Using strings of size {}.", string_size());
+    println!("Running {} samples.", samples());
+
+    println!("{} cloned elements.", if DROP { "Dropping" } else { "Not dropping" });
 
     let arc_base: Arc<str> = base.as_str().into();
     bench_clone(arc_base);
@@ -29,19 +49,19 @@ fn bench_clone<T: Clone + Send>(base: T) {
     let elapsed = scope(|s| {
         let running = Arc::new(AtomicBool::new(true));
 
-        for _ in 1..TOTAL_THREAD_COUNT {
+        for _ in 1..total_thread_count() {
             let local_base = base.clone();
             let local_running = running.clone();
 
             s.spawn(move || while local_running.load(Ordering::Relaxed) {
-                let _ = std::hint::black_box(local_base.clone());
+                run_clone(&local_base)
             });
         }
 
         let start = Instant::now();
 
-        for _ in 0..SAMPLES {
-            let _ = std::hint::black_box(base.clone());
+        for _ in 0..samples() {
+            run_clone(&base);
         }
 
         let elapsed = start.elapsed();
@@ -51,5 +71,13 @@ fn bench_clone<T: Clone + Send>(base: T) {
         elapsed
     });
 
-    println!("Took {}ms to perform {} clone operations on {}.", elapsed.as_millis(), SAMPLES, std::any::type_name::<T>())
+    println!("Took {}ms to perform {} clone operations on {}.", elapsed.as_millis(), samples(), std::any::type_name::<T>())
+}
+
+fn run_clone<T: Clone>(base: &T) {
+    let c = base.clone();
+
+    if !should_drop() {
+        std::mem::forget(c);
+    }
 }

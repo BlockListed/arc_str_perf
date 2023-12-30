@@ -1,0 +1,20 @@
+Running on 12 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Took 4831ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 315ms to perform 16777216 clone operations on alloc::string::String.
+Running on 8 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Took 3439ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 305ms to perform 16777216 clone operations on alloc::string::String.
+Running on 4 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Took 1804ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 255ms to perform 16777216 clone operations on alloc::string::String.
+Running on 1 threads concurrently.
+Using strings of size 64.
+Running 16777216 samples.
+Took 55ms to perform 16777216 clone operations on alloc::sync::Arc<str>.
+Took 252ms to perform 16777216 clone operations on alloc::string::String.
