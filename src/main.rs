@@ -14,6 +14,8 @@ const TOTAL_THREAD_COUNT: usize = 12;
 
 const DROP: bool = false;
 
+const JSON: bool = true;
+
 fn samples() -> u64 {
     SAMPLES
 }
@@ -29,7 +31,7 @@ fn total_thread_count() -> usize {
         if let Some(v) = std::env::var("TOTAL_THREAD_COUNT").ok().and_then(|s| s.parse().ok()) {
             v
         } else {
-            println!("Using fallback value for TOTAL_THREAD_COUNT: {TOTAL_THREAD_COUNT}");
+            if !JSON { println!("Using fallback value for TOTAL_THREAD_COUNT: {TOTAL_THREAD_COUNT}")};
             TOTAL_THREAD_COUNT
         }
     })
@@ -43,7 +45,7 @@ fn should_drop() -> bool {
             Some(v) if v == "yes" => true,
             Some(v) if v == "no" => false,
             _ => {
-                println!("Using fallback value for SHOULD_DROP: {DROP}");
+                if !JSON { println!("Using fallback value for SHOULD_DROP: {DROP}") };
                 DROP
             }
         }
@@ -53,11 +55,13 @@ fn should_drop() -> bool {
 fn main() {
     let base: String = std::iter::repeat('A').take(string_size()).collect();
 
-    println!("Running on {} threads concurrently.", total_thread_count());
-    println!("Using strings of size {}.", string_size());
-    println!("Running {} samples.", samples());
+    if !JSON {
+        println!("Running on {} threads concurrently.", total_thread_count());
+        println!("Using strings of size {}.", string_size());
+        println!("Running {} samples.", samples());
 
-    println!("{} cloned elements.", if DROP { "Dropping" } else { "Not dropping" });
+        println!("{} cloned elements.", if DROP { "Dropping" } else { "Not dropping" });
+    }
 
     let arc_base: Arc<str> = base.as_str().into();
     bench_clone(arc_base);
@@ -91,7 +95,11 @@ fn bench_clone<T: Clone + Send>(base: T) {
         elapsed
     });
 
-    println!("Took {}ms to perform {} clone operations on {}.", elapsed.as_millis(), samples(), std::any::type_name::<T>())
+    if JSON {
+        println!(r#"{{"type": "{}", "threads": {}, "drop": {}, "time_millis": {}}}"#, std::any::type_name::<T>(), total_thread_count(), should_drop(), elapsed.as_millis());
+    } else {
+        println!("Took {}ms to perform {} clone operations on {}.", elapsed.as_millis(), samples(), std::any::type_name::<T>())
+    }
 }
 
 fn run_clone<T: Clone>(base: &T) {
