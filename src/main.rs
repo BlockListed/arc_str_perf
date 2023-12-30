@@ -1,5 +1,5 @@
 use std::thread::scope;
-use std::time::Instant;
+use std::time::{Instant, Duration};
 use std::sync::{Arc, OnceLock};
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -14,7 +14,7 @@ const TOTAL_THREAD_COUNT: usize = 12;
 
 const DROP: bool = false;
 
-const JSON: bool = true;
+const JSON: bool = false;
 
 fn samples() -> u64 {
     SAMPLES
@@ -31,7 +31,7 @@ fn total_thread_count() -> usize {
         if let Some(v) = std::env::var("TOTAL_THREAD_COUNT").ok().and_then(|s| s.parse().ok()) {
             v
         } else {
-            if !JSON { println!("Using fallback value for TOTAL_THREAD_COUNT: {TOTAL_THREAD_COUNT}")};
+            eprintln!("Using fallback value for TOTAL_THREAD_COUNT: {TOTAL_THREAD_COUNT}");
             TOTAL_THREAD_COUNT
         }
     })
@@ -45,7 +45,7 @@ fn should_drop() -> bool {
             Some(v) if v == "yes" => true,
             Some(v) if v == "no" => false,
             _ => {
-                if !JSON { println!("Using fallback value for SHOULD_DROP: {DROP}") };
+                eprintln!("Using fallback value for SHOULD_DROP: {DROP}");
                 DROP
             }
         }
@@ -60,13 +60,38 @@ fn main() {
         println!("Using strings of size {}.", string_size());
         println!("Running {} samples.", samples());
 
-        println!("{} cloned elements.", if DROP { "Dropping" } else { "Not dropping" });
+        println!("{} cloned elements.", if should_drop() { "Dropping" } else { "Not dropping" });
+    }
+
+    if std::env::var("PROFILE_MAPPED").unwrap_or_default() == "yes" {
+        std::thread::spawn(allocator_stats);
     }
 
     let arc_base: Arc<str> = base.as_str().into();
     bench_clone(arc_base);
     let string_base = base.clone();
     bench_clone(string_base);
+}
+
+fn allocator_stats() {
+    const SLEEP_TIME: Duration = Duration::from_millis(10);
+
+    let epoch = tikv_jemalloc_ctl::epoch::mib().unwrap();
+    let mapped = tikv_jemalloc_ctl::stats::mapped::mib().unwrap();
+
+    let mut max_mapped: usize = 0;
+
+    loop {
+        epoch.advance().unwrap();
+
+        let amount_mapped = mapped.read().unwrap();
+
+        max_mapped = std::cmp::max(amount_mapped, max_mapped);
+
+        println!("Current mapped amount: {}", bytesize::ByteSize::b(amount_mapped as u64));
+
+        std::thread::sleep(SLEEP_TIME)
+    }
 }
 
 fn bench_clone<T: Clone + Send>(base: T) {
@@ -96,6 +121,7 @@ fn bench_clone<T: Clone + Send>(base: T) {
     });
 
     if JSON {
+        // Double squirly-braces result in normal squirly-braces for the print! family of macros
         println!(r#"{{"type": "{}", "threads": {}, "drop": {}, "time_millis": {}}}"#, std::any::type_name::<T>(), total_thread_count(), should_drop(), elapsed.as_millis());
     } else {
         println!("Took {}ms to perform {} clone operations on {}.", elapsed.as_millis(), samples(), std::any::type_name::<T>())
