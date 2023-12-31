@@ -177,7 +177,7 @@ fn bench_clone_non_send<T: Clone>(base: T) {
         );
     } else {
         println!(
-            "Took {}ms to perform {} clone operations on {}.",
+            "Took {}ms to perform {} (single-threaded) clone operations on {}.",
             elapsed.as_millis(),
             samples(),
             std::any::type_name::<T>()
