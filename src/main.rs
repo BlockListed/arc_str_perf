@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, OnceLock};
 use std::thread::scope;
@@ -79,6 +80,8 @@ fn main() {
     bench_clone(arc_base);
     let string_base = base.clone();
     bench_clone(string_base);
+    let rc_base: Rc<str> = base.as_str().into();
+    bench_clone_non_send(rc_base);
 }
 
 fn allocator_stats() {
@@ -132,6 +135,36 @@ fn bench_clone<T: Clone + Send>(base: T) {
 
         elapsed
     });
+
+    if JSON {
+        // Double squirly-braces result in normal squirly-braces for the print! family of macros
+        println!(
+            r#"{{"type": "{}", "threads": {}, "drop": {}, "time_millis": {}}}"#,
+            std::any::type_name::<T>(),
+            total_thread_count(),
+            should_drop(),
+            elapsed.as_millis()
+        );
+    } else {
+        println!(
+            "Took {}ms to perform {} clone operations on {}.",
+            elapsed.as_millis(),
+            samples(),
+            std::any::type_name::<T>()
+        )
+    }
+}
+
+fn bench_clone_non_send<T: Clone>(base: T) {
+    let elapsed = {
+        let start = Instant::now();
+
+        for _ in 0..samples() {
+            run_clone(&base);
+        }
+
+        start.elapsed()
+    };
 
     if JSON {
         // Double squirly-braces result in normal squirly-braces for the print! family of macros
