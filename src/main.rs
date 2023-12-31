@@ -1,7 +1,8 @@
-use std::thread::scope;
-use std::time::{Instant, Duration};
-use std::sync::{Arc, OnceLock};
+use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, OnceLock};
+use std::thread::scope;
+use std::time::{Duration, Instant};
 
 use tikv_jemallocator::Jemalloc;
 
@@ -28,7 +29,10 @@ fn total_thread_count() -> usize {
     static ONCE: OnceLock<usize> = OnceLock::new();
 
     *ONCE.get_or_init(|| {
-        if let Some(v) = std::env::var("TOTAL_THREAD_COUNT").ok().and_then(|s| s.parse().ok()) {
+        if let Some(v) = std::env::var("TOTAL_THREAD_COUNT")
+            .ok()
+            .and_then(|s| s.parse().ok())
+        {
             v
         } else {
             eprintln!("Using fallback value for TOTAL_THREAD_COUNT: {TOTAL_THREAD_COUNT}");
@@ -40,14 +44,12 @@ fn total_thread_count() -> usize {
 fn should_drop() -> bool {
     static ONCE: OnceLock<bool> = OnceLock::new();
 
-    *ONCE.get_or_init(|| {
-        match std::env::var("SHOULD_DROP").ok() {
-            Some(v) if v == "yes" => true,
-            Some(v) if v == "no" => false,
-            _ => {
-                eprintln!("Using fallback value for SHOULD_DROP: {DROP}");
-                DROP
-            }
+    *ONCE.get_or_init(|| match std::env::var("SHOULD_DROP").ok() {
+        Some(v) if v == "yes" => true,
+        Some(v) if v == "no" => false,
+        _ => {
+            eprintln!("Using fallback value for SHOULD_DROP: {DROP}");
+            DROP
         }
     })
 }
@@ -60,7 +62,14 @@ fn main() {
         println!("Using strings of size {}.", string_size());
         println!("Running {} samples.", samples());
 
-        println!("{} cloned elements.", if should_drop() { "Dropping" } else { "Not dropping" });
+        println!(
+            "{} cloned elements.",
+            if should_drop() {
+                "Dropping"
+            } else {
+                "Not dropping"
+            }
+        );
     }
 
     if std::env::var("PROFILE_MAPPED").unwrap_or_default() == "yes" {
@@ -71,6 +80,8 @@ fn main() {
     bench_clone(arc_base);
     let string_base = base.clone();
     bench_clone(string_base);
+    let rc_base: Rc<str> = base.as_str().into();
+    bench_clone_non_send(rc_base);
 }
 
 fn allocator_stats() {
@@ -88,7 +99,10 @@ fn allocator_stats() {
 
         max_mapped = std::cmp::max(amount_mapped, max_mapped);
 
-        println!("Current mapped amount: {}", bytesize::ByteSize::b(amount_mapped as u64));
+        println!(
+            "Current mapped amount: {}",
+            bytesize::ByteSize::b(amount_mapped as u64)
+        );
 
         std::thread::sleep(SLEEP_TIME)
     }
@@ -102,8 +116,10 @@ fn bench_clone<T: Clone + Send>(base: T) {
             let local_base = base.clone();
             let local_running = running.clone();
 
-            s.spawn(move || while local_running.load(Ordering::Relaxed) {
-                run_clone(&local_base)
+            s.spawn(move || {
+                while local_running.load(Ordering::Relaxed) {
+                    run_clone(&local_base)
+                }
             });
         }
 
@@ -122,9 +138,50 @@ fn bench_clone<T: Clone + Send>(base: T) {
 
     if JSON {
         // Double squirly-braces result in normal squirly-braces for the print! family of macros
-        println!(r#"{{"type": "{}", "threads": {}, "drop": {}, "time_millis": {}}}"#, std::any::type_name::<T>(), total_thread_count(), should_drop(), elapsed.as_millis());
+        println!(
+            r#"{{"type": "{}", "threads": {}, "drop": {}, "time_millis": {}}}"#,
+            std::any::type_name::<T>(),
+            total_thread_count(),
+            should_drop(),
+            elapsed.as_millis()
+        );
     } else {
-        println!("Took {}ms to perform {} clone operations on {}.", elapsed.as_millis(), samples(), std::any::type_name::<T>())
+        println!(
+            "Took {}ms to perform {} clone operations on {}.",
+            elapsed.as_millis(),
+            samples(),
+            std::any::type_name::<T>()
+        )
+    }
+}
+
+fn bench_clone_non_send<T: Clone>(base: T) {
+    let elapsed = {
+        let start = Instant::now();
+
+        for _ in 0..samples() {
+            run_clone(&base);
+        }
+
+        start.elapsed()
+    };
+
+    if JSON {
+        // Double squirly-braces result in normal squirly-braces for the print! family of macros
+        println!(
+            r#"{{"type": "{}", "threads": {}, "drop": {}, "time_millis": {}}}"#,
+            std::any::type_name::<T>(),
+            total_thread_count(),
+            should_drop(),
+            elapsed.as_millis()
+        );
+    } else {
+        println!(
+            "Took {}ms to perform {} clone operations on {}.",
+            elapsed.as_millis(),
+            samples(),
+            std::any::type_name::<T>()
+        )
     }
 }
 
