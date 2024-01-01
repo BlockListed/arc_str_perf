@@ -111,6 +111,10 @@ fn allocator_stats() {
 fn bench_clone<T: Clone + Send>(base: T) {
     let elapsed = scope(|s| {
         // technically the max would be TOTAL_THREAD_COUNT-1
+        // we're using a channel to accumulate, since accumulating
+        // using a shared atomic would cause performance issues (as this exercise proved).
+        // the threads each have an internal non-shared counter,
+        // which is sent over the channel when finished.
         let (count_tx, count_rx) = mpsc::sync_channel(TOTAL_THREAD_COUNT);
         let mut stop_tx_list: Vec<mpsc::SyncSender<()>> = Vec::new();
 
