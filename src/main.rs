@@ -12,7 +12,7 @@ const SAMPLES: u64 = 2u64.pow(24);
 const STRING_SIZE: usize = 64;
 const TOTAL_THREAD_COUNT: usize = 12;
 
-const DROP: bool = false;
+const DROP: bool = true;
 
 const JSON: bool = false;
 
