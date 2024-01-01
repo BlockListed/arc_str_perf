@@ -3,6 +3,7 @@ use std::sync::{mpsc, Arc, OnceLock};
 use std::thread::scope;
 use std::time::{Duration, Instant};
 
+use num_format::ToFormattedString;
 use tikv_jemallocator::Jemalloc;
 
 #[global_allocator]
@@ -151,8 +152,9 @@ fn bench_clone<T: Clone + Send>(base: T) {
                 "Total amount of samples for {} in {}ms: {} - {}/s",
                 std::any::type_name::<T>(),
                 elapsed.as_millis(),
-                total,
-                (total / elapsed.as_millis() as u64) * 1000
+                total.to_formatted_string(&num_format::Locale::en),
+                ((total / elapsed.as_millis() as u64) * 1000)
+                    .to_formatted_string(&num_format::Locale::en)
             )
         }
 
@@ -194,8 +196,9 @@ fn bench_clone_non_send<T: Clone>(base: T) {
             "Total amount of samples for {} in {}ms: {} - {}/s",
             std::any::type_name::<T>(),
             elapsed.as_millis(),
-            samples(),
-            (samples() / elapsed.as_millis() as u64) * 1000
+            samples().to_formatted_string(&num_format::Locale::en),
+            ((samples() / elapsed.as_millis() as u64) * 1000)
+                .to_formatted_string(&num_format::Locale::en)
         )
     }
 
