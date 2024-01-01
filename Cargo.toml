@@ -12,4 +12,9 @@ tikv-jemalloc-ctl = "0.5.4"
 tikv-jemallocator = "0.5.4"
 
 [dev-dependencies]
+criterion = "0.5.1"
 loom = "0.7.1"
+
+[[bench]]
+name = "arc_str"
+harness = false
