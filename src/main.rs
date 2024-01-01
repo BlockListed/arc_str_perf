@@ -1,6 +1,5 @@
 use std::rc::Rc;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, OnceLock};
+use std::sync::{mpsc, Arc, OnceLock};
 use std::thread::scope;
 use std::time::{Duration, Instant};
 
@@ -110,16 +109,23 @@ fn allocator_stats() {
 
 fn bench_clone<T: Clone + Send>(base: T) {
     let elapsed = scope(|s| {
-        let running = Arc::new(AtomicBool::new(true));
+        // technically the max would be TOTAL_THREAD_COUNT-1
+        let (count_tx, count_rx) = mpsc::sync_channel(TOTAL_THREAD_COUNT);
+        let mut stop_tx_list: Vec<mpsc::SyncSender<()>> = Vec::new();
 
         for _ in 1..total_thread_count() {
             let local_base = base.clone();
-            let local_running = running.clone();
+            let local_count = count_tx.clone();
+            let (stop_tx, stop_rx) = mpsc::sync_channel(1);
+            stop_tx_list.push(stop_tx);
 
             s.spawn(move || {
-                while local_running.load(Ordering::Relaxed) {
-                    run_clone(&local_base)
+                let mut count: u64 = 0;
+                while stop_rx.try_recv().is_err() {
+                    run_clone(&local_base);
+                    count += 1;
                 }
+                local_count.send(count).unwrap();
             });
         }
 
@@ -131,7 +137,24 @@ fn bench_clone<T: Clone + Send>(base: T) {
 
         let elapsed = start.elapsed();
 
-        running.store(false, Ordering::Relaxed);
+        stop_tx_list.into_iter().for_each(|tx| {
+            tx.send(()).unwrap();
+        });
+
+        let total = (1..total_thread_count())
+            .map(|_| count_rx.recv().unwrap())
+            .sum::<u64>()
+            + samples();
+
+        if !JSON {
+            println!(
+                "Total amount of samples for {} in {}ms: {} - {}/s",
+                std::any::type_name::<T>(),
+                elapsed.as_millis(),
+                total,
+                (total / elapsed.as_millis() as u64) * 1000
+            )
+        }
 
         elapsed
     });
@@ -166,12 +189,22 @@ fn bench_clone_non_send<T: Clone>(base: T) {
         start.elapsed()
     };
 
+    if !JSON {
+        println!(
+            "Total amount of samples for {} in {}ms: {} - {}/s",
+            std::any::type_name::<T>(),
+            elapsed.as_millis(),
+            samples(),
+            (samples() / elapsed.as_millis() as u64) * 1000
+        )
+    }
+
     if JSON {
         // Double squirly-braces result in normal squirly-braces for the print! family of macros
         println!(
             r#"{{"type": "{}", "threads": {}, "drop": {}, "time_millis": {}}}"#,
             std::any::type_name::<T>(),
-            total_thread_count(),
+            1,
             should_drop(),
             elapsed.as_millis()
         );
