@@ -15,7 +15,7 @@ const TOTAL_THREAD_COUNT: usize = 12;
 
 const DROP: bool = true;
 
-const JSON: bool = false;
+const JSON: bool = true;
 
 fn samples() -> u64 {
     SAMPLES

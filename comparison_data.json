@@ -3,13 +3,43 @@
     "type": "alloc::sync::Arc<str>",
     "threads": 1,
     "drop": true,
-    "time_millis": 52
+    "time_millis": 51
   },
   {
     "type": "alloc::string::String",
     "threads": 1,
     "drop": true,
-    "time_millis": 157
+    "time_millis": 156
+  },
+  {
+    "type": "alloc::rc::Rc<str>",
+    "threads": 1,
+    "drop": true,
+    "time_millis": 14
+  },
+  {
+    "type": "alloc::rc::Rc<str>",
+    "threads": 1,
+    "drop": true,
+    "time_millis": 14
+  },
+  {
+    "type": "alloc::rc::Rc<str>",
+    "threads": 1,
+    "drop": true,
+    "time_millis": 14
+  },
+  {
+    "type": "alloc::rc::Rc<str>",
+    "threads": 1,
+    "drop": true,
+    "time_millis": 14
+  },
+  {
+    "type": "alloc::rc::Rc<str>",
+    "threads": 1,
+    "drop": true,
+    "time_millis": 14
   },
   {
     "type": "alloc::sync::Arc<str>",
@@ -21,102 +51,132 @@
     "type": "alloc::string::String",
     "threads": 1,
     "drop": false,
-    "time_millis": 300
+    "time_millis": 296
+  },
+  {
+    "type": "alloc::rc::Rc<str>",
+    "threads": 1,
+    "drop": false,
+    "time_millis": 10
+  },
+  {
+    "type": "alloc::rc::Rc<str>",
+    "threads": 1,
+    "drop": false,
+    "time_millis": 10
+  },
+  {
+    "type": "alloc::rc::Rc<str>",
+    "threads": 1,
+    "drop": false,
+    "time_millis": 11
+  },
+  {
+    "type": "alloc::rc::Rc<str>",
+    "threads": 1,
+    "drop": false,
+    "time_millis": 12
+  },
+  {
+    "type": "alloc::rc::Rc<str>",
+    "threads": 1,
+    "drop": false,
+    "time_millis": 16
   },
   {
     "type": "alloc::sync::Arc<str>",
     "threads": 2,
     "drop": true,
-    "time_millis": 1090
+    "time_millis": 430
   },
   {
     "type": "alloc::string::String",
     "threads": 2,
     "drop": true,
-    "time_millis": 157
+    "time_millis": 156
   },
   {
     "type": "alloc::sync::Arc<str>",
     "threads": 2,
     "drop": false,
-    "time_millis": 535
+    "time_millis": 234
   },
   {
     "type": "alloc::string::String",
     "threads": 2,
     "drop": false,
-    "time_millis": 326
+    "time_millis": 305
   },
   {
     "type": "alloc::sync::Arc<str>",
     "threads": 4,
     "drop": true,
-    "time_millis": 1261
+    "time_millis": 2149
   },
   {
     "type": "alloc::string::String",
     "threads": 4,
     "drop": true,
-    "time_millis": 157
+    "time_millis": 156
   },
   {
     "type": "alloc::sync::Arc<str>",
     "threads": 4,
     "drop": false,
-    "time_millis": 1055
+    "time_millis": 689
   },
   {
     "type": "alloc::string::String",
     "threads": 4,
     "drop": false,
-    "time_millis": 451
+    "time_millis": 327
   },
   {
     "type": "alloc::sync::Arc<str>",
     "threads": 8,
     "drop": true,
-    "time_millis": 3721
+    "time_millis": 3724
   },
   {
     "type": "alloc::string::String",
     "threads": 8,
     "drop": true,
-    "time_millis": 316
+    "time_millis": 303
   },
   {
     "type": "alloc::sync::Arc<str>",
     "threads": 8,
     "drop": false,
-    "time_millis": 2038
+    "time_millis": 1904
   },
   {
     "type": "alloc::string::String",
     "threads": 8,
     "drop": false,
-    "time_millis": 772
+    "time_millis": 558
   },
   {
     "type": "alloc::sync::Arc<str>",
     "threads": 12,
     "drop": true,
-    "time_millis": 4853
+    "time_millis": 4819
   },
   {
     "type": "alloc::string::String",
     "threads": 12,
     "drop": true,
-    "time_millis": 330
+    "time_millis": 302
   },
   {
     "type": "alloc::sync::Arc<str>",
     "threads": 12,
     "drop": false,
-    "time_millis": 2619
+    "time_millis": 2681
   },
   {
     "type": "alloc::string::String",
     "threads": 12,
     "drop": false,
-    "time_millis": 1406
+    "time_millis": 725
   }
 ]

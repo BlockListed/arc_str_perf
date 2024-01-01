@@ -1,5 +1,6 @@
 # Step 1: Gather bench data
-With JSON set to true in `src/main.rs` run `./run.sh > comparison_data.jsonl` to benchmark
+With JSON set to true in `src/main.rs` run
+`./run.sh | jq --slurp "sort_by(.threads)" > comparison_data.json` to benchmark
 all pairs of SHOULD_DROP and TOTAL_THREAD_COUNT, you may need to
 adjust the `TOTAL_THREAD_COUNT_VALUES` variable, if you don't have
 12 threads or want to benchmark a different configuraiton.
