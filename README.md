@@ -20,5 +20,5 @@ This also deduplicates the date. Mainly, because of the repeated testing of `Rc<
 
 Be ware that the script requires `pandas`.
 
-# Step 4: Use the data
+# Step 3: Use the data
 Libreoffice Calc or Excel in my case
